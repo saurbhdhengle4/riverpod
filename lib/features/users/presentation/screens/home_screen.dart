@@ -61,7 +61,7 @@ class _HomeScreenState extends State<HomeScreen> {
             return Center(child: Text(state.message));
           }
 
-          return const Center(child: Text("Initial State"));
+          return Container();
         },
       ),
     );
