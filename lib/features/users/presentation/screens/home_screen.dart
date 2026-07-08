@@ -1,40 +1,69 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:river/features/users/data/models/user_model.dart';
-import 'package:river/features/users/presentation/providers/user_provider.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:river/features/users/presentation/bloc/user_bloc.dart';
+import 'package:river/features/users/presentation/bloc/user_event.dart';
+import 'package:river/features/users/presentation/bloc/user_state.dart';
 
-class HomeScreen extends ConsumerWidget {
+class HomeScreen extends StatefulWidget {
   const HomeScreen({super.key});
 
   @override
-  Widget build(BuildContext context, WidgetRef ref) {
-    final users = ref.watch(usersProvider);
+  State<HomeScreen> createState() => _HomeScreenState();
+}
+
+class _HomeScreenState extends State<HomeScreen> {
+  @override
+  void initState() {
+    super.initState();
+
+    context.read<UserBloc>().add(const LoadUsers());
+  }
+
+  @override
+  Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: Colors.white,
-      appBar: AppBar(title: Text("River Pod User List"), backgroundColor: Colors.white),
-      body: users.when(
-        data: (user) {
-          return ListView.builder(
-            itemCount: user.length,
-            itemBuilder: (context, index) {
-              UserModel data = user[index];
-              return ListTile(
-                title: Text(data.name),
-                subtitle: Text(data.email),
-                leading: Text(data.id.toString()),
-              );
-            },
-          );
-        },
-        error: (error, stackTrace) {
-          return Center(child: Text("No Data Found"));
-        },
+      appBar: AppBar(
+        backgroundColor: Colors.white,
+        title: const Text(
+          'Users bloc view',
+          style: TextStyle(color: Colors.black),
+        ),
+      ),
+      body: BlocBuilder<UserBloc, UserState>(
+        builder: (BuildContext context, state) {
+          if (state is UserLoading) {
+            return const Center(child: CircularProgressIndicator());
+          }
 
-        loading: () {
-          return const Center(child: CircularProgressIndicator());
+          if (state is UserLoaded) {
+            return ListView.builder(
+              itemCount: state.users.length,
+
+              itemBuilder: (context, index) {
+                final user = state.users[index];
+
+                return ListTile(
+                  leading: CircleAvatar(
+                    backgroundColor: Colors.white,
+                    child: Text(user.id.toString()),
+                  ),
+
+                  title: Text(user.name),
+
+                  subtitle: Text(user.email),
+                );
+              },
+            );
+          }
+
+          if (state is UserError) {
+            return Center(child: Text(state.message));
+          }
+
+          return const Center(child: Text("Initial State"));
         },
       ),
     );
   }
 }
-//UI

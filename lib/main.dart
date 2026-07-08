@@ -1,20 +1,28 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:river/features/users/presentation/screens/splash_screen.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:river/core/network/api_service.dart';
+import 'package:river/features/users/data/repository/user_repository.dart';
+import 'package:river/features/users/presentation/bloc/user_bloc.dart';
+
+import 'features/users/presentation/screens/splash_screen.dart';
 
 void main() {
-  runApp(ProviderScope(child: const MyApp()));
+  runApp(
+    BlocProvider(
+      create: (context) => UserBloc(UserRepository(ApiService())),
+      child: const MyApp(),
+    ),
+  );
 }
 
 class MyApp extends StatelessWidget {
   const MyApp({super.key});
 
-  // This widget is the root of your application.
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
-      title: 'Flutter Demo',
-      theme: ThemeData(colorScheme: .fromSeed(seedColor: Colors.deepPurple)),
+      debugShowCheckedModeBanner: false,
+      title: 'Bloc Application',
       home: const SplashScreen(),
     );
   }
